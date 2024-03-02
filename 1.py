@@ -21,10 +21,15 @@ commands:
     -o name                     output set named "name"
     -a name element             insert "element" into set named "name"
     -d name element             delete "element" from set named "name"
+    -L, -l                      list names of all sets
     -h                          help
     """)
 
+def list_sets():
+    print(*(sets.keys()))
+
 def input_set(name, *elms):
+    if name in sets: print(f"set \"{name}\" exists and will be overwriten")
     sets[name] = set(elms)
     print(f"\"{name}\" created")
 
@@ -50,6 +55,8 @@ actions = {
     "-a": add_to_set,
     "-d": del_from_set,
     "-h": help_,
+    "-L": list_sets,
+    "-l": list_sets,
     None: lambda x:None, # for triggering task execution before exit
     }
 
