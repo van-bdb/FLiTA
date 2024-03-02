@@ -3,7 +3,6 @@ import sys, json
 try:
     with open("sets.json", "rt") as f:
         sets = json.load(f)
-    sets = {k:set(v) for k,v in sets.items()}
 except:
     sets = dict()
 
@@ -30,7 +29,7 @@ def list_sets():
 
 def input_set(name, *elms):
     if name in sets: print(f"set \"{name}\" exists and will be overwriten")
-    sets[name] = set(elms)
+    sets[name] = list(elms)
     print(f"\"{name}\" created")
 
 def output_set(name):
@@ -41,12 +40,13 @@ def output_set(name):
     print(f"{name}={set_str}")
     
 def add_to_set(name, elm):
-    sets[name].add(elm)
+    if elm not in sets[name]:
+        sets[name].append(elm)
 
 def del_from_set(name, elm):
     try:
         sets[name].remove(elm)
-    except KeyError:
+    except ValueError:
         print(f"NIL: {elm} not in set {name}")
  
 actions = {
@@ -85,4 +85,4 @@ if __name__ == "__main__":
     parse(args)
     if sets:
         with open("sets.json", "wt") as f:
-            json.dump({k:list(v) for k,v in sets.items()}, f)
+            json.dump(sets, f)
