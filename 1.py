@@ -29,7 +29,8 @@ def list_sets():
 
 def input_set(name, *elms):
     if name in sets: print(f"set \"{name}\" exists and will be overwriten")
-    sets[name] = list(elms)
+    sets[name] = []
+    for i in elms: add_to_set(name, i)
     print(f"\"{name}\" created")
 
 def output_set(name):
