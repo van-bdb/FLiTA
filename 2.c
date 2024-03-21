@@ -71,6 +71,7 @@ int writeto(char *fname, void *graph){
     }
     fprintf(fp, "graph {\n");
     unsigned long len = *((unsigned long*) graph);
+    for (unsigned long i=0; i<len; i++) fprintf(fp, "%i\n", i);
     for (unsigned long i=0; i<len; i++){
         for (unsigned long j=i; j<len; j++){
             int edge = *edgeptr(graph, i, j);
