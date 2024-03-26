@@ -6,6 +6,7 @@
 unsigned long getlen(FILE *fp, int separator, int ending);
 int *edgeptr(void *graph, unsigned long x, unsigned long y);
 void *readfrom(char *fname);
+unsigned long long count(void *graph);
 unsigned long long size(len){ return ((len * (len+1ULL))>>1); }
 
 void main(int argc, char *argv[]){
@@ -20,27 +21,43 @@ void main(int argc, char *argv[]){
         if (graph == NULL){
             printf("Error while reading adjacency matrix from \"%s\"\n", argv[1]);
         } else{
-            char *newpath = malloc(strlen(argv[1]) + 4);
-            strcpy(newpath, argv[1]);
-            strcat(newpath, ".gv");
-            writeto(newpath, graph);
-            char *command_ = malloc(strlen(argv[1])*2 + 40);
-            strcpy(command_, "dot -Tsvg ");
-            strcat(command_, argv[1]);
-            strcat(command_, ".gv > ");
-            strcat(command_, argv[1]);
-            strcat(command_, ".svg");
-            //printf(command_);
-            system(command_);
+            writeto(argv[1], graph);
+            call_dot(argv[1]);
             char *svg = malloc(strlen(argv[1]) + 5);
             strcpy(svg, argv[1]);
             strcat(svg, ".svg");
             printf("Success: file \"%s\" created\n", svg);
             system(svg);
+            unsigned long long edgecount = count(graph);
+            unsigned long n = *((unsigned long *) graph);
+            if (edgecount >= ((n-1)*(n-2)/2)){
+                printf("Inequality %i >= (%i-1)*(%i-2)/2 holds\n", edgecount, n, n);
+                printf("Graph is connected\n");
+            } else {
+                printf("Inequality %i >= (%i-1)*(%i-2)/2 does not hold\n", edgecount, n, n);
+                if (edgecount < n-1){
+                    printf("Inequality %i < (%i-1) holds\n", edgecount, n);
+                    printf("Graph is disconnected\n");
+                } else {
+                    printf("Graph could be disconnected\n");
+                }
+            }
         }
     }
     printf("Any key to continue\n");
     getchar();
+}
+
+void call_dot(char path[]){
+    char *command_ = malloc(strlen(path)*2 + 40);
+    strcpy(command_, "dot -Tsvg ");
+    strcat(command_, path);
+    strcat(command_, ".gv > ");
+    strcat(command_, path);
+    strcat(command_, ".svg");
+    //printf(command_);
+    system(command_);
+    free(command_);
 }
 
 void *readfrom(char *fname){
@@ -62,7 +79,10 @@ void *readfrom(char *fname){
     return(graph);
 }
 
-int writeto(char *fname, void *graph){
+int writeto(char *fname_, void *graph){
+    char *fname = malloc(strlen(fname_) + 4);
+    strcpy(fname, fname_);
+    strcat(fname, ".gv");
     FILE *fp;
     if ((fp = fopen(fname, "w")) == NULL)
     {
@@ -166,4 +186,18 @@ void printgraph(void *graph){
         }
     }
     printf("\n");
+}
+
+unsigned long long count(void *graph){
+    unsigned long len = *((unsigned long*) graph);
+    unsigned long long s = size(len);
+    printf("printgraph of size %i\n",s);
+    int *edges = (int *) (graph + sizeof(unsigned long));
+    unsigned long long counter = 0;
+    for (unsigned long i=0; i<len; i++){
+        for (unsigned long j = i+1; j<len; j++){
+            counter += (*edgeptr(graph, i, j) >0);
+        }
+    }
+    return(counter);
 }
